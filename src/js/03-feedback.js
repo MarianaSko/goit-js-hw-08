@@ -3,10 +3,10 @@ import throttle from 'lodash.throttle';
 
 const formFields = document.querySelector('.feedback-form');
 
-let dataObj = {};
+
 
 const fillFormFields = () => {
-    const dataObjFromLS = storageAPI.load("formInfo");
+    const dataObjFromLS = storageAPI.load("formInfo") || {};
     if (dataObjFromLS === undefined) {
         return;
     }
@@ -26,14 +26,17 @@ const fillFormFields = () => {
 }
 fillFormFields();
 
-const onFormFieldsChange = ({ target }) => {
-    const formFieldValue = target.value;
-    const formFieldName = target.name;
-    dataObj[formFieldName] = formFieldValue;
-    storageAPI.save("formInfo", dataObj);
-    console.log(dataObj);
+const onFormFieldsInput = ({ target }) => {
+    const dataObj = {};
+    const formData = new FormData(formFields);
 
+    formData.forEach((value, key) => {
+        dataObj[key] = value;
+    });
+
+    storageAPI.save("formInfo", dataObj);
 };
+
 
 const onFormSubmit = event => {
     event.preventDefault();
@@ -41,7 +44,7 @@ const onFormSubmit = event => {
     console.log(storageAPI.load("formInfo"));
     localStorage.removeItem('formInfo');
 }
-formFields.addEventListener('input', throttle(onFormFieldsChange, 500));
+formFields.addEventListener('input', throttle(onFormFieldsInput, 500));
 
 
 formFields.addEventListener('submit', onFormSubmit);
